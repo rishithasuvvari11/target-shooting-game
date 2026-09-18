@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>Target Shooting Game</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            #07111f,
+            #102b43
+        );
+
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+/* MAIN GAME */
+
+.game {
+    width: 100%;
+    max-width: 900px;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    position: relative;
+}
+
+/* HEADER */
+
+.header {
+
+    height: 75px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    background:
+        rgba(0,0,0,0.75);
+
+    border-bottom:
+        2px solid #1e9fff;
+
+    z-index: 20;
+}
+
+.stat {
+
+    min-width: 90px;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+.stat strong {
+
+    display: block;
+
+    font-size: 21px;
+
+    margin-top: 3px;
+}
+
+.level {
+
+    color: #ffd43b;
+}
+
+/* GAME AREA */
+
+#gameArea {
+
+    flex: 1;
+
+    position: relative;
+
+    overflow: hidden;
+
+    cursor: crosshair;
+
+    background:
+
+        linear-gradient(
+            to bottom,
+            #65b6e8 0%,
+            #bde7ff 45%,
+            #c59a62 46%,
+            #a87542 100%
+        );
+}
+
+/* SKY */
+
+#gameArea::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    top: 0;
+
+    height: 48%;
+
+    background:
+
+        radial-gradient(
+            circle at 20% 25%,
+            white 0,
+            rgba(255,255,255,.7) 30px,
+            transparent 70px
+        );
+
+    pointer-events: none;
+}
+
+/* MOUNTAINS */
+
+.mountains {
+
+    position: absolute;
+
+    bottom: 49%;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 170px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            transparent 48%,
+            #617181 49%,
+            #465665 55%,
+            transparent 56%
+        );
+
+    opacity: .85;
+
+    pointer-events: none;
+}
+
+/* GROUND */
+
+.ground {
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: 0;
+
+    height: 52%;
+
+    background:
+
+        repeating-linear-gradient(
+            10deg,
+            #a76e3d 0,
+            #a76e3d 15px,
+            #9a6337 16px,
+            #9a6337 28px
+        );
+
+    pointer-events: none;
+}
+
+/* RANGE OBJECTS */
+
+.box {
+
+    position: absolute;
+
+    width: 70px;
+    height: 50px;
+
+    background: #79502e;
+
+    border:
+        3px solid #54351e;
+
+    box-shadow:
+        0 5px 8px rgba(0,0,0,.4);
+
+    pointer-events: none;
+}
+
+.box1 {
+    left: 7%;
+    bottom: 22%;
+}
+
+.box2 {
+    right: 8%;
+    bottom: 25%;
+}
+
+.barrel {
+
+    position: absolute;
+
+    width: 55px;
+    height: 70px;
+
+    border-radius: 10px;
+
+    background:
+        repeating-linear-gradient(
+            #777,
+            #777 12px,
+            #444 13px,
+            #444 20px
+        );
+
+    border: 3px solid #333;
+
+    pointer-events: none;
+}
+
+.barrel1 {
+    left: 22%;
+    bottom: 8%;
+}
+
+.barrel2 {
+    right: 25%;
+    bottom: 12%;
+}
+
+/* TARGET */
+
+.target {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    width: 78px;
+    height: 78px;
+
+    z-index: 5;
+
+    cursor: crosshair;
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,.5);
+
+    user-select: none;
+
+    transition:
+        transform .08s;
+}
+
+.target:active {
+
+    transform: scale(.82);
+}
+
+/* NORMAL TARGET */
+
+.target.normal {
+
+    background:
+
+        radial-gradient(
+            circle,
+
+            #111 0 10%,
+
+            white 11% 25%,
+
+            #d92727 26% 43%,
+
+            white 44% 61%,
+
+            #d92727 62% 80%,
+
+            white 81% 100%
+        );
+
+}
+
+/* GOLD TARGET */
+
+.target.gold {
+
+    background:
+
+        radial-gradient(
+            circle,
+
+            #ffdf00 0 12%,
+
+            #fff 13% 28%,
+
+            #ffb000 29% 48%,
+
+            #fff 49% 65%,
+
+            #ffb000 66% 100%
+        );
+
+    box-shadow:
+        0 0 25px gold;
+}
+
+/* SMALL TARGET */
+
+.target.small {
+
+    width: 50px;
+    height: 50px;
+
+    background:
+
+        radial-gradient(
+            circle,
+
+            black 0 20%,
+
+            white 21% 40%,
+
+            red 41% 65%,
+
+            white 66% 100%
+        );
+}
+
+/* DRONE */
+
+.drone {
+
+    position: absolute;
+
+    width: 65px;
+    height: 35px;
+
+    background: #333;
+
+    border-radius: 50%;
+
+    z-index: 4;
+
+    box-shadow:
+        0 4px 8px rgba(0,0,0,.5);
+}
+
+.drone::before,
+.drone::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 55px;
+    height: 7px;
+
+    background: #222;
+
+    top: -7px;
+
+    border-radius: 50%;
+}
+
+.drone::before {
+    left: -25px;
+}
+
+.drone::after {
+    right: -25px;
+}
+
+/* CROSSHAIR */
+
+#crosshair {
+
+    position: absolute;
+
+    width: 70px;
+    height: 70px;
+
+    border:
+        3px solid rgba(255,255,255,.9);
+
+    border-radius: 50%;
+
+    z-index: 15;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%, -50%);
+}
+
+#crosshair::before,
+#crosshair::after {
+
+    content: "";
+
+    position: absolute;
+
+    background: white;
+}
+
+#crosshair::before {
+
+    width: 3px;
+    height: 90px;
+
+    left: 50%;
+    top: -13px;
+}
+
+#crosshair::after {
+
+    width: 90px;
+    height: 3px;
+
+    top: 50%;
+    left: -13px;
+}
+
+.cross-dot {
+
+    position: absolute;
+
+    width: 8px;
+    height: 8px;
+
+    background: red;
+
+    border-radius: 50%;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+}
+
+/* GUN */
+
+#gun {
+
+    position: absolute;
+
+    width: 150px;
+    height: 170px;
+
+    right: 50%;
+
+    bottom: -60px;
+
+    transform:
+        translateX(50%);
+
+    z-index: 12;
+
+    pointer-events: none;
+}
+
+.gun-body {
+
+    position: absolute;
+
+    width: 85px;
+    height: 125px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #111,
+            #555,
+            #151515
+        );
+
+    border-radius: 10px;
+
+    right: 33px;
+
+    bottom: 10px;
+
+    transform:
+        rotate(-5deg);
+
+    box-shadow:
+        0 5px 10px black;
+}
+
+.gun-barrel {
+
+    position: absolute;
+
+    width: 40px;
+    height: 110px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #111,
+            #666,
+            #111
+        );
+
+    right: 55px;
+
+    bottom: 110px;
+
+    border-radius: 8px;
+
+    transform:
+        rotate(-5deg);
+}
+
+.gun-handle {
+
+    position: absolute;
+
+    width: 42px;
+    height: 75px;
+
+    background: #191919;
+
+    right: 40px;
+
+    bottom: -10px;
+
+    transform:
+        rotate(18deg);
+
+    border-radius: 7px;
+}
+
+/* MUZZLE FLASH */
+
+#muzzleFlash {
+
+    position: absolute;
+
+    width: 70px;
+    height: 70px;
+
+    right: calc(50% + 33px);
+
+    bottom: 145px;
+
+    z-index: 20;
+
+    display: none;
+
+    background:
+
+        radial-gradient(
+            circle,
+            white 0 15%,
+            yellow 16% 35%,
+            orange 36% 55%,
+            transparent 70%
+        );
+
+    animation:
+        flash .12s linear;
+}
+
+@keyframes flash {
+
+    from {
+        transform: scale(.5);
+        opacity: 1;
+    }
+
+    to {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* HIT EFFECT */
+
+.hit {
+
+    position: absolute;
+
+    width: 30px;
+    height: 30px;
+
+    border:
+        4px solid yellow;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    z-index: 30;
+
+    animation:
+        hitAnimation .45s ease-out forwards;
+}
+
+@keyframes hitAnimation {
+
+    from {
+        transform: scale(.2);
+        opacity: 1;
+    }
+
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+/* + SCORE */
+
+.score-popup {
+
+    position: absolute;
+
+    color: #fff;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    z-index: 31;
+
+    pointer-events: none;
+
+    animation:
+        scoreAnimation .7s ease-out forwards;
+
+    text-shadow:
+        2px 2px 4px black;
+}
+
+@keyframes scoreAnimation {
+
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(-60px);
+        opacity: 0;
+    }
+}
+
+/* SCREENS */
+
+.screen {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 50;
+
+    background:
+        rgba(3,10,20,.88);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    padding: 20px;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.logo {
+
+    font-size: 46px;
+
+    color: #ffd43b;
+
+    text-shadow:
+        0 4px 10px black;
+
+    margin-bottom: 12px;
+}
+
+.subtitle {
+
+    color: #ddd;
+
+    margin-bottom: 30px;
+
+    font-size: 18px;
+}
+
+/* BUTTONS */
+
+.btn {
+
+    width: 250px;
+
+    margin: 7px;
+
+    padding: 14px 20px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    color: white;
+
+    cursor: pointer;
+
+    background:
+        linear-gradient(
+            #1e9fff,
+            #086ac4
+        );
+
+    box-shadow:
+        0 4px 8px rgba(0,0,0,.4);
+}
+
+.btn.play {
+
+    background:
+        linear-gradient(
+            #32e052,
+            #07952b
+        );
+}
+
+.btn.danger {
+
+    background:
+        linear-gradient(
+            #ff5252,
+            #bd1010
+        );
+}
+
+.btn:active {
+
+    transform: scale(.96);
+}
+
+/* PAUSE */
+
+.pause-box {
+
+    background:
+        rgba(0,0,0,.8);
+
+    border:
+        2px solid #1e9fff;
+
+    padding: 30px;
+
+    border-radius: 18px;
+}
+
+/* RESULT */
+
+.result-score {
+
+    font-size: 52px;
+
+    color: #ffd43b;
+
+    margin: 10px;
+}
+
+.coins {
+
+    color: #ffd43b;
+
+    font-size: 25px;
+
+    margin-bottom: 15px;
+}
+
+/* SETTINGS */
+
+.setting-row {
+
+    width: 300px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px;
+
+    border-bottom:
+        1px solid #345;
+}
+
+/* TOGGLE */
+
+.toggle {
+
+    width: 55px;
+    height: 28px;
+
+    border-radius: 20px;
+
+    background: #555;
+
+    cursor: pointer;
+
+    position: relative;
+}
+
+.toggle.on {
+    background: #16c95a;
+}
+
+.toggle::after {
+
+    content: "";
+
+    width: 22px;
+    height: 22px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    position: absolute;
+
+    top: 3px;
+    left: 3px;
+
+    transition: .2s;
+}
+
+.toggle.on::after {
+
+    left: 30px;
+}
+
+/* MOBILE */
+
+@media(max-width:600px) {
+
+    .header {
+        height: 65px;
+    }
+
+    .stat {
+        min-width: 65px;
+        font-size: 11px;
+    }
+
+    .stat strong {
+        font-size: 17px;
+    }
+
+    .logo {
+        font-size: 34px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+    }
+
+    .btn {
+        width: 220px;
+    }
+
+    #gun {
+        transform:
+            translateX(50%)
+            scale(.75);
+    }
+
+    #crosshair {
+        width: 60px;
+        height: 60px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="game">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div class="stat">
+            ❤️
+            <strong id="lives">3</strong>
+        </div>
+
+        <div class="stat">
+            🏆 SCORE
+            <strong id="score">0</strong>
+        </div>
+
+        <div class="stat">
+            🪙 COINS
+            <strong id="coins">0</strong>
+        </div>
+
+        <div class="stat level">
+            LEVEL
+            <strong id="level">1</strong>
+        </div>
+
+        <div class="stat">
+            ⏱️ TIME
+            <strong id="time">60</strong>
+        </div>
+
+        <button
+            id="pauseButton"
+            style="
+            background:none;
+            border:none;
+            color:white;
+            font-size:25px;
+            cursor:pointer;">
+            ⏸️
+        </button>
+
+    </div>
+
+
+    <!-- GAME AREA -->
+
+    <div id="gameArea">
+
+        <div class="mountains"></div>
+
+        <div class="ground"></div>
+
+        <div class="box box1"></div>
+
+        <div class="box box2"></div>
+
+        <div class="barrel barrel1"></div>
+
+        <div class="barrel barrel2"></div>
+
+
+        <!-- CROSSHAIR -->
+
+        <div id="crosshair">
+
+            <div class="cross-dot"></div>
+
+        </div>
+
+
+        <!-- GUN -->
+
+        <div id="gun">
+
+            <div class="gun-barrel"></div>
+
+            <div class="gun-body"></div>
+
+            <div class="gun-handle"></div>
+
+        </div>
+
+
+        <div id="muzzleFlash"></div>
+
+
+        <!-- START SCREEN -->
+
+        <div
+            id="menuScreen"
+            class="screen">
+
+            <div class="logo">
+                🎯 TARGET SHOOTING
+            </div>
+
+            <div class="subtitle">
+                Test your speed and accuracy!
+            </div>
+
+            <button
+                class="btn play"
+                id="playButton">
+                ▶️ PLAY GAME
+            </button>
+
+            <button
+                class="btn"
+                id="highScoreButton">
+                🏆 HIGH SCORE
+            </button>
+
+            <button
+                class="btn"
+                id="settingsButton">
+                ⚙️ SETTINGS
+            </button>
+
+        </div>
+
+
+        <!-- PAUSE SCREEN -->
+
+        <div
+            id="pauseScreen"
+            class="screen hidden">
+
+            <div class="pause-box">
+
+                <h1>⏸️ PAUSED</h1>
+
+                <br>
+
+                <button
+                    class="btn play"
+                    id="resumeButton">
+                    ▶️ RESUME
+                </button>
+
+                <button
+                    class="btn"
+                    id="restartButton1">
+                    🔄 RESTART
+                </button>
+
+                <button
+                    class="btn danger"
+                    id="menuButton1">
+                    🏠 MAIN MENU
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- GAME OVER -->
+
+        <div
+            id="gameOverScreen"
+            class="screen hidden">
+
+            <h1>🏁 GAME OVER</h1>
+
+            <div>
+                YOUR SCORE
+            </div>
+
+            <div
+                class="result-score"
+                id="finalScore">
+                0
+            </div>
+
+            <div class="coins">
+                🪙 +<span id="earnedCoins">0</span>
+            </div>
+
+            <button
+                class="btn play"
+                id="restartButton2">
+                🔄 PLAY AGAIN
+            </button>
+
+            <button
+                class="btn"
+                id="menuButton2">
+                🏠 MAIN MENU
+            </button>
+
+        </div>
+
+
+        <!-- LEVEL COMPLETE -->
+
+        <div
+            id="levelScreen"
+            class="screen hidden">
+
+            <h1>⭐ LEVEL COMPLETE!</h1>
+
+            <div>
+                SCORE
+            </div>
+
+            <div
+                class="result-score"
+                id="levelScore">
+                0
+            </div>
+
+            <div class="coins">
+                🪙 +<span id="levelCoins">0</span>
+            </div>
+
+            <button
+                class="btn play"
+                id="nextLevelButton">
+                ▶️ NEXT LEVEL
+            </button>
+
+        </div>
+
+
+        <!-- HIGH SCORE -->
+
+        <div
+            id="highScoreScreen"
+            class="screen hidden">
+
+            <h1>🏆 HIGH SCORE</h1>
+
+            <br>
+
+            <div style="font-size:25px">
+                Highest Score
+            </div>
+
+            <div
+                class="result-score"
+                id="highScoreValue">
+                0
+            </div>
+
+            <button
+                class="btn"
+                id="highBackButton">
+                ← BACK
+            </button>
+
+        </div>
+
+
+        <!-- SETTINGS -->
+
+        <div
+            id="settingsScreen"
+            class="screen hidden">
+
+            <h1>⚙️ SETTINGS</h1>
+
+            <br>
+
+            <div class="setting-row">
+
+                <span>🔊 Sound</span>
+
+                <div
+                    class="toggle on"
+                    id="soundToggle">
+                </div>
+
+            </div>
+
+            <div class="setting-row">
+
+                <span>🎵 Music</span>
+
+                <div
+                    class="toggle on"
+                    id="musicToggle">
+                </div>
+
+            </div>
+
+            <br>
+
+            <button
+                class="btn"
+                id="settingsBackButton">
+                ← BACK
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================
+   GAME VARIABLES
+===================================== */
+
+let score = 0;
+
+let lives = 3;
+
+let coins = 0;
+
+let timeLeft = 60;
+
+let level = 1;
+
+let gameRunning = false;
+
+let paused = false;
+
+let timerInterval;
+
+let targetInterval;
+
+let targetMoveInterval;
+
+let targetCount = 0;
+
+let soundEnabled = true;
+
+let musicEnabled = true;
+
+let audioContext;
+
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const gameArea =
+    document.getElementById("gameArea");
+
+const scoreElement =
+    document.getElementById("score");
+
+const livesElement =
+    document.getElementById("lives");
+
+const coinsElement =
+    document.getElementById("coins");
+
+const timeElement =
+    document.getElementById("time");
+
+const levelElement =
+    document.getElementById("level");
+
+const crosshair =
+    document.getElementById("crosshair");
+
+const muzzleFlash =
+    document.getElementById("muzzleFlash");
+
+
+/* SCREENS */
+
+const menuScreen =
+    document.getElementById("menuScreen");
+
+const pauseScreen =
+    document.getElementById("pauseScreen");
+
+const gameOverScreen =
+    document.getElementById("gameOverScreen");
+
+const levelScreen =
+    document.getElementById("levelScreen");
+
+const highScoreScreen =
+    document.getElementById("highScoreScreen");
+
+const settingsScreen =
+    document.getElementById("settingsScreen");
+
+
+/* =====================================
+   AUDIO
+===================================== */
+
+function initAudio() {
+
+    if (!audioContext) {
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+}
+
+
+/* SHOOT SOUND */
+
+function shootSound() {
+
+    if (!soundEnabled) return;
+
+    initAudio();
+
+    const oscillator =
+        audioContext.createOscillator();
+
+    const gain =
+        audioContext.createGain();
+
+    oscillator.type = "sawtooth";
+
+    oscillator.frequency.setValueAtTime(
+        180,
+        audioContext.currentTime
+    );
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        60,
+        audioContext.currentTime + .12
+    );
+
+    gain.gain.setValueAtTime(
+        .25,
+        audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioContext.currentTime + .12
+    );
+
+    oscillator.connect(gain);
+
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+        audioContext.currentTime + .12
+    );
+}
+
+
+/* HIT SOUND */
+
+function hitSound() {
+
+    if (!soundEnabled) return;
+
+    initAudio();
+
+    const oscillator =
+        audioContext.createOscillator();
+
+    const gain =
+        audioContext.createGain();
+
+    oscillator.type = "sine";
+
+    oscillator.frequency.value = 700;
+
+    gain.gain.setValueAtTime(
+        .15,
+        audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioContext.currentTime + .15
+    );
+
+    oscillator.connect(gain);
+
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+        audioContext.currentTime + .15
+    );
+}
+
+
+/* =====================================
+   SCREEN CONTROL
+===================================== */
+
+function hideAllScreens() {
+
+    menuScreen.classList.add("hidden");
+
+    pauseScreen.classList.add("hidden");
+
+    gameOverScreen.classList.add("hidden");
+
+    levelScreen.classList.add("hidden");
+
+    highScoreScreen.classList.add("hidden");
+
+    settingsScreen.classList.add("hidden");
+}
+
+
+/* =====================================
+   START GAME
+===================================== */
+
+function startGame() {
+
+    initAudio();
+
+    score = 0;
+
+    lives = 3;
+
+    coins = 0;
+
+    timeLeft = 60;
+
+    level = 1;
+
+    gameRunning = true;
+
+    paused = false;
+
+    targetCount = 0;
+
+
+    updateHUD();
+
+    hideAllScreens();
+
+    removeTargets();
+
+    startTimers();
+
+    createTarget();
+
+}
+
+
+/* =====================================
+   HUD
+===================================== */
+
+function updateHUD() {
+
+    scoreElement.textContent =
+        score;
+
+    livesElement.textContent =
+        lives;
+
+    coinsElement.textContent =
+        coins;
+
+    timeElement.textContent =
+        timeLeft;
+
+    levelElement.textContent =
+        level;
+
+}
+
+
+/* =====================================
+   TIMERS
+===================================== */
+
+function startTimers() {
+
+    clearInterval(timerInterval);
+
+    clearInterval(targetInterval);
+
+    clearInterval(targetMoveInterval);
+
+
+    /* TIMER */
+
+    timerInterval =
+        setInterval(function() {
+
+            if (
+                !gameRunning ||
+                paused
+            ) {
+                return;
+            }
+
+            timeLeft--;
+
+            updateHUD();
+
+            if (timeLeft <= 0) {
+
+                endGame();
+
+            }
+
+        }, 1000);
+
+
+    /* CREATE TARGETS */
+
+    targetInterval =
+        setInterval(function() {
+
+            if (
+                gameRunning &&
+                !paused
+            ) {
+
+                createTarget();
+
+            }
+
+        }, getSpawnSpeed());
+
+
+    /* MOVE TARGETS */
+
+    targetMoveInterval =
+        setInterval(function() {
+
+            if (
+                gameRunning &&
+                !paused
+            ) {
+
+                moveTargets();
+
+            }
+
+        }, getMoveSpeed());
+
+}
+
+
+/* =====================================
+   DIFFICULTY
+===================================== */
+
+function getSpawnSpeed() {
+
+    return Math.max(
+        500,
+        1500 - level * 100
+    );
+
+}
+
+
+function getMoveSpeed() {
+
+    return Math.max(
+        300,
+        1000 - level * 80
+    );
+
+}
+
+
+/* =====================================
+   CREATE TARGET
+===================================== */
+
+function createTarget() {
+
+    if (!gameRunning || paused) {
+        return;
+    }
+
+
+    /* LIMIT TARGETS */
+
+    const currentTargets =
+        document.querySelectorAll(
+            ".target"
+        ).length;
+
+    const maximum =
+        Math.min(
+            3 + level,
+            8
+        );
+
+    if (
+        currentTargets >= maximum
+    ) {
+        return;
+    }
+
+
+    const target =
+        document.createElement("div");
+
+    target.classList.add("target");
+
+
+    /* RANDOM TARGET TYPE */
+
+    const random =
+        Math.random();
+
+
+    if (random < .15) {
+
+        target.classList.add("gold");
+
+        target.dataset.points = "25";
+
+        target.dataset.coins = "5";
+
+    }
+
+    else if (random < .35) {
+
+        target.classList.add("small");
+
+        target.dataset.points = "20";
+
+        target.dataset.coins = "2";
+
+    }
+
+    else {
+
+        target.classList.add("normal");
+
+        target.dataset.points = "10";
+
+        target.dataset.coins = "1";
+
+    }
+
+
+    /* RANDOM POSITION */
+
+    const areaWidth =
+        gameArea.clientWidth;
+
+    const areaHeight =
+        gameArea.clientHeight;
+
+
+    const targetSize =
+        target.offsetWidth || 78;
+
+
+    const x =
+        Math.random() *
+        (areaWidth - targetSize);
+
+
+    const y =
+        50 +
+        Math.random() *
+        (areaHeight - 220);
+
+
+    target.style.left =
+        Math.max(0,x) + "px";
+
+    target.style.top =
+        Math.max(0,y) + "px";
+
+
+    /* TARGET CLICK */
+
+    target.addEventListener(
+        "pointerdown",
+        function(event) {
+
+            event.stopPropagation();
+
+            shootTarget(
+                target,
+                event.clientX,
+                event.clientY
+            );
+
+        }
+    );
+
+
+    gameArea.appendChild(target);
+
+    targetCount++;
+
+}
+
+
+/* =====================================
+   MOVE TARGETS
+===================================== */
+
+function moveTargets() {
+
+    const targets =
+        document.querySelectorAll(
+            ".target"
+        );
+
+    targets.forEach(function(target) {
+
+        const width =
+            target.offsetWidth;
+
+        const height =
+            target.offsetHeight;
+
+
+        const maxX =
+            gameArea.clientWidth -
+            width;
+
+        const maxY =
+            gameArea.clientHeight -
+            height -
+            100;
+
+
+        target.style.left =
+            Math.random() *
+            maxX + "px";
+
+
+        target.style.top =
+            50 +
+            Math.random() *
+            Math.max(
+                50,
+                maxY - 50
+            ) + "px";
+
+    });
+
+}
+
+
+/* =====================================
+   SHOOT TARGET
+===================================== */
+
+function shootTarget(
+    target,
+    clientX,
+    clientY
+) {
+
+    if (
+        !gameRunning ||
+        paused
+    ) {
+        return;
+    }
+
+
+    shootSound();
+
+    showMuzzleFlash();
+
+
+    const points =
+        Number(
+            target.dataset.points
+        );
+
+
+    const earned =
+        Number(
+            target.dataset.coins
+        );
+
+
+    score += points;
+
+    coins += earned;
+
+
+    hitSound();
+
+
+    /* HIT EFFECT */
+
+    const rect =
+        target.getBoundingClientRect();
+
+    const areaRect =
+        gameArea.getBoundingClientRect();
+
+
+    const hit =
+        document.createElement("div");
+
+    hit.className =
+        "hit";
+
+
+    hit.style.left =
+        (
+            rect.left -
+            areaRect.left +
+            rect.width / 2 -
+            15
+        ) + "px";
+
+
+    hit.style.top =
+        (
+            rect.top -
+            areaRect.top +
+            rect.height / 2 -
+            15
+        ) + "px";
+
+
+    gameArea.appendChild(hit);
+
+
+    /* SCORE POPUP */
+
+    const popup =
+        document.createElement("div");
+
+    popup.className =
+        "score-popup";
+
+    popup.textContent =
+        "+" + points;
+
+
+    popup.style.left =
+        (
+            rect.left -
+            areaRect.left
+        ) + "px";
+
+
+    popup.style.top =
+        (
+            rect.top -
+            areaRect.top -
+            10
+        ) + "px";
+
+
+    gameArea.appendChild(popup);
+
+
+    /* REMOVE */
+
+    target.remove();
+
+
+    setTimeout(function() {
+
+        hit.remove();
+
+        popup.remove();
+
+    },700);
+
+
+    updateHUD();
+
+
+    /* LEVEL CHECK */
+
+    checkLevel();
+
+}
+
+
+/* =====================================
+   LEVEL SYSTEM
+===================================== */
+
+function checkLevel() {
+
+    const required =
+        level * 100;
+
+
+    if (
+        score >= required
+    ) {
+
+        completeLevel();
+
+    }
+
+}
+
+
+/* =====================================
+   LEVEL COMPLETE
+===================================== */
+
+function completeLevel() {
+
+    if (!gameRunning) {
+        return;
+    }
+
+
+    gameRunning = false;
+
+    clearTimers();
+
+    removeTargets();
+
+
+    const reward =
+        level * 10;
+
+
+    coins += reward;
+
+
+    document.getElementById(
+        "levelScore"
+    ).textContent = score;
+
+
+    document.getElementById(
+        "levelCoins"
+    ).textContent = reward;
+
+
+    updateHUD();
+
+
+    levelScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* NEXT LEVEL */
+
+document.getElementById(
+    "nextLevelButton"
+).addEventListener(
+    "click",
+    function() {
+
+        level++;
+
+        timeLeft =
+            Math.min(
+                60,
+                timeLeft + 15
+            );
+
+        gameRunning = true;
+
+        levelScreen.classList.add(
+            "hidden"
+        );
+
+        updateHUD();
+
+        startTimers();
+
+        createTarget();
+
+    }
+);
+
+
+/* =====================================
+   MISSED SHOT
+===================================== */
+
+gameArea.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        if (
+            !gameRunning ||
+            paused
+        ) {
+            return;
+        }
+
+
+        if (
+            event.target.classList.contains(
+                "target"
+            )
+        ) {
+            return;
+        }
+
+
+        lives--;
+
+        updateHUD();
+
+
+        if (lives <= 0) {
+
+            endGame();
+
+        }
+
+    }
+);
+
+
+/* =====================================
+   CROSSHAIR
+===================================== */
+
+gameArea.addEventListener(
+    "pointermove",
+    function(event) {
+
+        const rect =
+            gameArea.getBoundingClientRect();
+
+
+        crosshair.style.left =
+            (
+                event.clientX -
+                rect.left
+            ) + "px";
+
+
+        crosshair.style.top =
+            (
+                event.clientY -
+                rect.top
+            ) + "px";
+
+    }
+);
+
+
+/* =====================================
+   MUZZLE FLASH
+===================================== */
+
+function showMuzzleFlash() {
+
+    muzzleFlash.style.display =
+        "block";
+
+
+    muzzleFlash.style.animation =
+        "none";
+
+
+    void muzzleFlash.offsetWidth;
+
+
+    muzzleFlash.style.animation =
+        "flash .12s linear";
+
+
+    setTimeout(function() {
+
+        muzzleFlash.style.display =
+            "none";
+
+    },120);
+
+}
+
+
+/* =====================================
+   PAUSE
+===================================== */
+
+document.getElementById(
+    "pauseButton"
+).addEventListener(
+    "click",
+    pauseGame
+);
+
+
+function pauseGame() {
+
+    if (!gameRunning) {
+        return;
+    }
+
+
+    paused = true;
+
+    pauseScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+document.getElementById(
+    "resumeButton"
+).addEventListener(
+    "click",
+    function() {
+
+        paused = false;
+
+        pauseScreen.classList.add(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* =====================================
+   END GAME
+===================================== */
+
+function endGame() {
+
+    gameRunning = false;
+
+    paused = false;
+
+    clearTimers();
+
+    removeTargets();
+
+
+    const oldHighScore =
+        Number(
+            localStorage.getItem(
+                "targetHighScore"
+            ) || 0
+        );
+
+
+    if (
+        score > oldHighScore
+    ) {
+
+        localStorage.setItem(
+            "targetHighScore",
+            score
+        );
+
+    }
+
+
+    document.getElementById(
+        "finalScore"
+    ).textContent =
+        score;
+
+
+    document.getElementById(
+        "earnedCoins"
+    ).textContent =
+        coins;
+
+
+    gameOverScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =====================================
+   CLEAR TIMERS
+===================================== */
+
+function clearTimers() {
+
+    clearInterval(timerInterval);
+
+    clearInterval(targetInterval);
+
+    clearInterval(targetMoveInterval);
+
+}
+
+
+/* =====================================
+   REMOVE TARGETS
+===================================== */
+
+function removeTargets() {
+
+    document
+        .querySelectorAll(
+            ".target"
+        )
+        .forEach(function(target) {
+
+            target.remove();
+
+        });
+
+}
+
+
+/* =====================================
+   RESTART
+===================================== */
+
+document.getElementById(
+    "restartButton1"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+document.getElementById(
+    "restartButton2"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+/* =====================================
+   MAIN MENU
+===================================== */
+
+function goToMenu() {
+
+    gameRunning = false;
+
+    paused = false;
+
+    clearTimers();
+
+    removeTargets();
+
+    hideAllScreens();
+
+    menuScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+document.getElementById(
+    "menuButton1"
+).addEventListener(
+    "click",
+    goToMenu
+);
+
+
+document.getElementById(
+    "menuButton2"
+).addEventListener(
+    "click",
+    goToMenu
+);
+
+
+/* =====================================
+   PLAY
+===================================== */
+
+document.getElementById(
+    "playButton"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+/* =====================================
+   HIGH SCORE
+===================================== */
+
+document.getElementById(
+    "highScoreButton"
+).addEventListener(
+    "click",
+    function() {
+
+        const highScore =
+            localStorage.getItem(
+                "targetHighScore"
+            ) || 0;
+
+
+        document.getElementById(
+            "highScoreValue"
+        ).textContent =
+            highScore;
+
+
+        hideAllScreens();
+
+        highScoreScreen.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+
+document.getElementById(
+    "highBackButton"
+).addEventListener(
+    "click",
+    goToMenu
+);
+
+
+/* =====================================
+   SETTINGS
+===================================== */
+
+document.getElementById(
+    "settingsButton"
+).addEventListener(
+    "click",
+    function() {
+
+        hideAllScreens();
+
+        settingsScreen.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+
+document.getElementById(
+    "settingsBackButton"
+).addEventListener(
+    "click",
+    goToMenu
+);
+
+
+/* SOUND */
+
+document.getElementById(
+    "soundToggle"
+).addEventListener(
+    "click",
+    function() {
+
+        soundEnabled =
+            !soundEnabled;
+
+        this.classList.toggle(
+            "on",
+            soundEnabled
+        );
+
+    }
+);
+
+
+/* MUSIC */
+
+document.getElementById(
+    "musicToggle"
+).addEventListener(
+    "click",
+    function() {
+
+        musicEnabled =
+            !musicEnabled;
+
+        this.classList.toggle(
+            "on",
+            musicEnabled
+        );
+
+    }
+);
+
+
+/* =====================================
+   KEYBOARD CONTROLS
+===================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        /* SPACE = PAUSE */
+
+        if (
+            event.code === "Space"
+        ) {
+
+            if (gameRunning) {
+
+                pauseGame();
+
+            }
+
+        }
+
+
+        /* ESC = MENU */
+
+        if (
+            event.code === "Escape"
+        ) {
+
+            goToMenu();
+
+        }
+
+    }
+);
+
+
+/* =====================================
+   INITIALIZE
+===================================== */
+
+updateHUD();
+
+</script>
+
+</body>
+
+</html>
